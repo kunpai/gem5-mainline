@@ -416,6 +416,33 @@ class VectorParamDesc(ParamDesc):
         code("std::vector< ${{self.ptype.cxx_type}} > ${{self.name}};")
 
 
+class VectorVectorFloat(ParamValue):
+    cxx_type = "std::vector<std::vector<float>>"
+
+    def __init__(self, default=[], desc=""):
+        self.default = default
+        self.desc = desc
+
+    def getValue(self):
+        return self.default
+
+    @classmethod
+    def cxx_predecls(cls, code):
+        code("#include <vector>")
+
+    @classmethod
+    def cxx_decl(cls, code, name):
+        code("std::vector<std::vector<float>> %s;" % name)
+
+    @classmethod
+    def swig_decl(cls, code, name):
+        code("std::vector<std::vector<float>> %s;" % name)
+
+    @classmethod
+    def pybind_decl(cls, code, name):
+        code("std::vector<std::vector<float>> %s;" % name)
+
+
 class ParamFactory:
     def __init__(self, param_desc_class, ptype_str=None):
         self.param_desc_class = param_desc_class
@@ -2477,6 +2504,7 @@ def clear():
 __all__ = [
     "Param",
     "VectorParam",
+    "VectorVectorFloat",
     "Enum",
     "ScopedEnum",
     "Bool",
