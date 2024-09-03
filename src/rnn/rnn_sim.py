@@ -52,18 +52,27 @@ output_neurons = [
     for i in range(2)
 ]
 
+input_to_hidden = RNNInterconnect(latency=10.0, bandwidth=10.0)
+hidden_to_hidden = RNNInterconnect(latency=10.0, bandwidth=10.0)
+hidden_to_output = RNNInterconnect(latency=10.0, bandwidth=10.0)
+
 # input_neuron = RNNNeuron(neuron_id=0, layer_type='INPUT')
 # hidden_neuron = RNNNeuron(neuron_id=1, layer_type='HIDDEN', weights=[0.5])
 # output_neuron = RNNNeuron(neuron_id=2, layer_type='OUTPUT', weights=[0.5])
 
-rnn = RNN(neurons=input_neurons + hidden_neurons + output_neurons)
+rnn = RNN(
+    neurons=input_neurons + hidden_neurons + output_neurons,
+    input_to_hidden_interconnect=input_to_hidden,
+    hidden_to_hidden_interconnect=hidden_to_hidden,
+    hidden_to_output_interconnect=hidden_to_output,
+)
 
 # Create the RNN Training System
 training_system = RNNTrainingSystem(
     rnn=rnn,
     training_data=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
     target_outputs=[[0.4, 0.5], [0.7, 0.8]],
-    max_epochs=300,
+    max_epochs=30000,
 )
 
 # Add the training system to our system

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "params/RNN.hh"
+#include "rnn/RNNInterconnect.hh"
 #include "rnn/RNNNeuron.hh"
 #include "sim/sim_object.hh"
 
@@ -17,6 +18,10 @@ class RNN : public SimObject
     std::vector<RNNNeuron*> hiddenLayer;
     std::vector<RNNNeuron*> outputLayer;
     std::vector<float> previousHiddenState;
+
+    RNNInterconnect* inputToHiddenInterconnect;
+    RNNInterconnect* hiddenToHiddenInterconnect;
+    RNNInterconnect* hiddenToOutputInterconnect;
 
   public:
     PARAMS(RNN);

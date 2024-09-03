@@ -8,3 +8,12 @@ class RNN(SimObject):
     cxx_class = "gem5::RNN"
 
     neurons = VectorParam.RNNNeuron([], "Neurons in the RNN")
+    input_to_hidden_interconnect = Param.RNNInterconnect(
+        "Interconnect between input and hidden layers"
+    )
+    hidden_to_hidden_interconnect = Param.RNNInterconnect(
+        "Interconnect between hidden layers"
+    )
+    hidden_to_output_interconnect = Param.RNNInterconnect(
+        "Interconnect between hidden and output layers"
+    )

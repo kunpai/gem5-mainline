@@ -4,7 +4,10 @@ namespace gem5
 {
 
 RNN::RNN(const Params &params)
-    : SimObject(params)
+    : SimObject(params),
+      inputToHiddenInterconnect(params.input_to_hidden_interconnect),
+      hiddenToHiddenInterconnect(params.hidden_to_hidden_interconnect),
+      hiddenToOutputInterconnect(params.hidden_to_output_interconnect)
 {
     for (auto neuron : params.neurons) {
         switch (neuron->getLayerType()) {
@@ -20,6 +23,13 @@ RNN::RNN(const Params &params)
         }
     }
     previousHiddenState.resize(hiddenLayer.size(), 0.0);
+
+    inputToHiddenInterconnect->initializeWeights(inputLayer.size(),
+        hiddenLayer.size());
+    hiddenToHiddenInterconnect->initializeWeights(hiddenLayer.size(),
+        hiddenLayer.size());
+    hiddenToOutputInterconnect->initializeWeights(hiddenLayer.size(),
+        outputLayer.size());
 }
 
 void RNN::processInput(const std::vector<float>& input)
@@ -34,18 +44,31 @@ void RNN::processInput(const std::vector<float>& input)
     for (auto inputNeuron : inputLayer) {
         hiddenInputs.push_back(inputNeuron->getState());
     }
+
+    std::vector<float> propagatedHiddenInputs =
+        inputToHiddenInterconnect->propagateSignals(hiddenInputs);
+    std::vector<float> propagatedRecurrentInputs =
+        hiddenToHiddenInterconnect->propagateSignals(previousHiddenState);
+
     for (size_t i = 0; i < hiddenLayer.size(); ++i) {
-        hiddenLayer[i]->activate(hiddenInputs, previousHiddenState);
+        hiddenLayer[i]->activate(propagatedHiddenInputs,
+            propagatedRecurrentInputs);
         previousHiddenState[i] = hiddenLayer[i]->getState();
     }
 
     // Process output layer
     std::vector<float> outputInputs;
     for (auto hiddenNeuron : hiddenLayer) {
-        outputInputs.push_back(hiddenNeuron->getState());
+        outputInputs.push_back(
+            hiddenNeuron->getState()
+        );
     }
+
+    std::vector<float> propagatedOutputInputs =
+        hiddenToOutputInterconnect->propagateSignals(outputInputs);
+
     for (auto outputNeuron : outputLayer) {
-        outputNeuron->activate(outputInputs, {});
+        outputNeuron->activate(propagatedOutputInputs, {});
     }
 }
 
@@ -72,16 +95,14 @@ void RNN::backpropagate(const std::vector<float>& target)
     for (auto hiddenNeuron : hiddenLayer) {
         hiddenStates.push_back(hiddenNeuron->getState());
     }
-    for (size_t i = 0; i < outputLayer.size(); ++i) {
-        outputLayer[i]->updateWeights(hiddenStates, {}, outputErrors[i]);
-    }
+    hiddenToOutputInterconnect->updateWeights(
+        hiddenStates, outputErrors, 0.1);
+        // Learning rate of 0.1
 
     // Calculate hidden layer errors
     std::vector<float> hiddenErrors(hiddenLayer.size(), 0.0);
     for (size_t i = 0; i < hiddenLayer.size(); ++i) {
         for (size_t j = 0; j < outputLayer.size(); ++j) {
-            // This is a simplification.
-            // In a full implementation, we'd need access to the weights.
             hiddenErrors[i] += outputErrors[j] * 0.1;
             // 0.1 is a placeholder for the actual weight
         }
@@ -92,9 +113,18 @@ void RNN::backpropagate(const std::vector<float>& target)
     for (auto inputNeuron : inputLayer) {
         inputStates.push_back(inputNeuron->getState());
     }
+    inputToHiddenInterconnect->updateWeights(
+        inputStates, hiddenErrors, 0.1);
+    hiddenToHiddenInterconnect->updateWeights(
+        previousHiddenState, hiddenErrors, 0.1);
+
+    // Update neuron weights
     for (size_t i = 0; i < hiddenLayer.size(); ++i) {
-        hiddenLayer[i]->updateWeights(inputStates,
-        previousHiddenState, hiddenErrors[i]);
+        hiddenLayer[i]->updateWeights(
+            inputStates, previousHiddenState, hiddenErrors[i]);
+    }
+    for (size_t i = 0; i < outputLayer.size(); ++i) {
+        outputLayer[i]->updateWeights(hiddenStates, {}, outputErrors[i]);
     }
 }
 

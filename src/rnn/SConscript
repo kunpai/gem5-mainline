@@ -30,9 +30,12 @@ Import("*")
 SimObject("RNNNeuron.py", sim_objects = ["RNNNeuron"])
 SimObject("RNN.py", sim_objects = ["RNN"])
 SimObject("RNNTrainingSystem.py", sim_objects = ["RNNTrainingSystem"])
+SimObject("RNNInterconnect.py", sim_objects = ["RNNInterconnect"])
 
 Source("RNNNeuron.cc")
 Source("RNN.cc")
 Source("RNNTrainingSystem.cc")
+Source("RNNInterconnect.cc")
 
 DebugFlag("RNNTrainingSystem")
+DebugFlag("RNNInterconnect")
