@@ -61,9 +61,9 @@ rnn = RNN(neurons=input_neurons + hidden_neurons + output_neurons)
 # Create the RNN Training System
 training_system = RNNTrainingSystem(
     rnn=rnn,
-    training_data=[[1.0], [0.5], [0.0]],
-    target_outputs=[[1.0], [0.5], [0.0]],
-    max_epochs=20000,
+    training_data=[[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]],
+    target_outputs=[[0.4, 0.5], [0.7, 0.8]],
+    max_epochs=300,
 )
 
 # Add the training system to our system

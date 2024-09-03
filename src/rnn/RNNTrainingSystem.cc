@@ -18,8 +18,9 @@ RNNTrainingSystem::RNNTrainingSystem(const Params &params)
 }
 
 void RNNTrainingSystem::tick() {
-    DPRINTF(RNNTrainingSystem, "RNN Training System tick at %llu\n",
-    curTick());
+    DPRINTF(RNNTrainingSystem,
+        "RNN Training System tick at %llu, epoch %d/%d\n",
+        curTick(), currentEpoch + 1, maxEpochs);
 
     if (currentEpoch < maxEpochs) {
         trainEpoch();
@@ -35,19 +36,31 @@ void RNNTrainingSystem::tick() {
 }
 
 void RNNTrainingSystem::trainEpoch() {
-    DPRINTF(RNNTrainingSystem, "Training epoch %d\n", currentEpoch);
+    DPRINTF(RNNTrainingSystem, "Training epoch %d, total samples: %zu\n",
+            currentEpoch + 1, trainingData.size());
 
     for (size_t i = 0; i < trainingData.size(); i++) {
+        DPRINTF(RNNTrainingSystem, "Processing sample %zu/%zu in epoch %d\n",
+                i + 1, trainingData.size(), currentEpoch + 1);
+
         rnn->processInput(trainingData[i]);
         std::vector<float> output = rnn->getOutput();
         // Backpropagate and update weights
         rnn->backpropagate(targetOutputs[i]);
+
         // Print the output
-        DPRINTF(RNNTrainingSystem, "Sample %zu - Output: ", i);
+        DPRINTF(RNNTrainingSystem, "Sample %zu - Output: [", i);
         for (float val : output) {
             DPRINTF(RNNTrainingSystem, "%f ", val);
         }
-        DPRINTF(RNNTrainingSystem, "\n");
+        DPRINTF(RNNTrainingSystem, "]\n");
+
+        // Optionally print target outputs and error
+        DPRINTF(RNNTrainingSystem, "Sample %zu - Target: [", i);
+        for (float target : targetOutputs[i]) {
+            DPRINTF(RNNTrainingSystem, "%f ", target);
+        }
+        DPRINTF(RNNTrainingSystem, "]\n");
     }
 }
 
