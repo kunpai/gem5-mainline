@@ -1,6 +1,5 @@
-#include "rnn/RNNTrainingSystem.hh"
-
 #include "debug/RNNTrainingSystem.hh"
+#include "rnn/RNNTrainingSystem.hh"
 #include "sim/sim_exit.hh"
 
 namespace gem5 {

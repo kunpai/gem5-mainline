@@ -4,18 +4,17 @@ from m5 import (
 )
 from m5.objects import (
     RNNNeuron,
+    RNNTrainer,
     Root,
     SrcClockDomain,
     VoltageDomain,
 )
 from m5.simulate import simulate
-from m5.stats import (
-    dump,
-    reset,
-)
+from m5.stats import dump
 
 
-def run_rnn_test():
+# Create a test configuration
+def run_test():
     neuron = RNNNeuron(
         numInputs=3,
         inputWeights=[0.5, -0.3, 0.8],
@@ -24,17 +23,25 @@ def run_rnn_test():
         activationFunction="tanh",
     )
 
+    trainer = RNNTrainer(
+        rnnNeuron=neuron,  # Pass the created neuron to the trainer
+        numTrainingSteps=10,
+        learningRate=0.2,
+    )
+
     root = Root(full_system=False)
-    root.neuron = neuron
-    root.neuron.clk_domain = SrcClockDomain(
+    root.trainer = trainer
+    root.trainer.clk_domain = SrcClockDomain(
         clock="1GHz", voltage_domain=VoltageDomain()
     )
 
+    # Instantiate the simulation
     instantiate()
 
-    print("RNNNeuron test running...")
+    print("Starting the RNNTrainer simulation...")
 
-    exit_event = simulate(100000)
+    # Simulate for a sufficient number of ticks
+    exit_event = simulate()
     print(
         f"Simulation ended at tick {curTick()} because {exit_event.getCause()}"
     )
@@ -43,4 +50,4 @@ def run_rnn_test():
 
 
 if __name__ == "__m5_main__":
-    run_rnn_test()
+    run_test()

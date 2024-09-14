@@ -4,49 +4,52 @@
 #include <random>
 #include <vector>
 
+#include "debug/RNNNeuron.hh"
 #include "params/RNNNeuron.hh"
-#include "sim/sim_object.hh"
+#include "sim/clocked_object.hh"
 
 namespace gem5
 {
 
-enum class LayerType
-{
-    INPUT,
-    HIDDEN,
-    OUTPUT
-};
 
-class RNNNeuron : public SimObject
+class RNNNeuron : public ClockedObject
 {
   private:
-    int id;
-    LayerType layerType;
-    float state;
-    float bias;
-    std::vector<float> weights;
+    int numInputs;
+    std::vector<float> inputWeights;
     std::vector<float> recurrentWeights;
-    float learningRate;
+    std::vector<float> inputs;
+    std::vector<float> prevInputs;
+    float bias;
+    float output;
+    std::string activationFunction;
 
-    std::mt19937 rng;
-    std::normal_distribution<float> dist;
+    struct RNNNeuronStats : public statistics::Group
+    {
+      RNNNeuronStats(RNNNeuron& neuron);
 
-  public:
+      void regStats() override;
+
+      RNNNeuron& neuron;
+
+      statistics::Scalar numCycles;
+      statistics::Scalar numActivations;
+      statistics::Scalar numLearningUpdates;
+
+    };
+
+    RNNNeuronStats stats;
+
+    public:
     PARAMS(RNNNeuron);
     RNNNeuron(const Params &params);
 
-    int getId() const { return id; }
-    LayerType getLayerType() const { return layerType; }
-    void setState(float newState) { state = newState; }
-    float getState() const { return state; }
+    float activate(const std::vector<float>& inputs);
 
-    void activate(const std::vector<float>& inputs,
-    const std::vector<float>& recurrentInputs);
-    void updateWeights(const std::vector<float>& inputs,
-    const std::vector<float>& recurrentInputs, float error);
+    void learn(float learningRate, float error);
+    float tanhActivation(float x) const;
+    float tanhActivationDerivative(float x) const;
 
-    float tanh(float x) const;
-    float tanhDerivative(float x) const;
 };
 
 } // namespace gem5

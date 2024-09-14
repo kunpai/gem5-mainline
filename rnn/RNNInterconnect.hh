@@ -16,6 +16,32 @@ class RNNInterconnect : public ClockedObject
     float latency;
     float bandwidth;
 
+    u_int64_t totalPropagations;
+    Tick totalLatency;
+    float totalBandwidthUsed;
+    Tick startTick;
+
+    struct RNNInterconnectStats : public statistics::Group
+    {
+        RNNInterconnectStats(RNNInterconnect& interconn);
+
+        void regStats() override;
+
+        RNNInterconnect& interconn;
+
+        statistics::Scalar latency;
+        statistics::Scalar bandwidth;
+        statistics::Formula seconds;
+        statistics::Formula bandwidthGBps;
+        statistics::Scalar ticks;
+        statistics::Average actualLatency;
+        statistics::Scalar propagationCount;
+
+        void updateActualLatency(Tick actualLatencyTicks);
+    };
+
+    RNNInterconnectStats stats;
+
   public:
     PARAMS(RNNInterconnect);
     RNNInterconnect(const Params &params);

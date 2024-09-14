@@ -28,12 +28,14 @@
 Import("*")
 
 SimObject("RNNNeuron.py", sim_objects = ["RNNNeuron"])
-SimObject('RNNTrainer.py', sim_objects = ['RNNTrainer'])
+SimObject("RNN.py", sim_objects = ["RNN"])
+SimObject("RNNTrainingSystem.py", sim_objects = ["RNNTrainingSystem"])
+SimObject("RNNInterconnect.py", sim_objects = ["RNNInterconnect"])
 
 Source("RNNNeuron.cc")
-Source('RNNTrainer.cc')
+Source("RNN.cc")
+Source("RNNTrainingSystem.cc")
+Source("RNNInterconnect.cc")
 
-DebugFlag("RNNNeuron")
-DebugFlag("RNNTrainer")
-
-CompoundFlag("RNN", ["RNNNeuron", "RNNTrainer"])
+DebugFlag("RNNTrainingSystem")
+DebugFlag("RNNInterconnect")

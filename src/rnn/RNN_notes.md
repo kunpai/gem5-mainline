@@ -1,0 +1,14 @@
+- Class Neuron
+    -  members
+        - ActivationFunction
+        - NumInputs
+        - PrevInput (used for learning)
+        - InputWieghts
+        - Output
+        - Bias
+        - RecurrentWeight
+    - Functions
+        - Activate
+        - Tanh
+        - Tanh derivative
+        - Learn (update weights and bias)
